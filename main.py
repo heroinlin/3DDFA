@@ -15,7 +15,7 @@ import torchvision.transforms as transforms
 import mobilenet_v1
 import numpy as np
 import cv2
-import dlib
+from face_detection.face_detect_interface import FaceDetector, box_transform
 from utils.ddfa import ToTensorGjz, NormalizeGjz, str2bool
 import scipy.io as sio
 from utils.inference import get_suffix, parse_roi_box_from_landmark, crop_img, predict_68pts, dump_to_ply, dump_vertex, \
@@ -49,31 +49,15 @@ def main(args):
     model.eval()
 
     # 2. load dlib model for face detection and landmark used for face cropping
-    if args.dlib_landmark:
-        dlib_landmark_model = 'models/shape_predictor_68_face_landmarks.dat'
-        face_regressor = dlib.shape_predictor(dlib_landmark_model)
-    if args.dlib_bbox:
-        face_detector = dlib.get_frontal_face_detector()
+    face_detector = FaceDetector()
 
     # 3. forward
     tri = sio.loadmat('visualize/tri.mat')['tri']
     transform = transforms.Compose([ToTensorGjz(), NormalizeGjz(mean=127.5, std=128)])
     for img_fp in args.files:
         img_ori = cv2.imread(img_fp)
-        if args.dlib_bbox:
-            rects = face_detector(img_ori, 1)
-        else:
-            rects = []
-
-        if len(rects) == 0:
-            rects = dlib.rectangles()
-            rect_fp = img_fp + '.bbox'
-            lines = open(rect_fp).read().strip().split('\n')[1:]
-            for l in lines:
-                l, r, t, b = [int(_) for _ in l.split(' ')[1:]]
-                rect = dlib.rectangle(l, r, t, b)
-                rects.append(rect)
-
+        rects = face_detector.detect(img_ori)
+        rects = box_transform(rects, img_ori.shape[1], img_ori.shape[0])
         pts_res = []
         Ps = []  # Camera matrix collection
         poses = []  # pose collection, [todo: validate it]
@@ -81,16 +65,8 @@ def main(args):
         ind = 0
         suffix = get_suffix(img_fp)
         for rect in rects:
-            # whether use dlib landmark to crop image, if not, use only face bbox to calc roi bbox for cropping
-            if args.dlib_landmark:
-                # - use landmark for cropping
-                pts = face_regressor(img_ori, rect).parts()
-                pts = np.array([[pt.x, pt.y] for pt in pts]).T
-                roi_box = parse_roi_box_from_landmark(pts)
-            else:
-                # - use detected face bbox
-                bbox = [rect.left(), rect.top(), rect.right(), rect.bottom()]
-                roi_box = parse_roi_box_from_bbox(bbox)
+            bbox = [rect[1], rect[2], rect[3], rect[4]]
+            roi_box = parse_roi_box_from_bbox(bbox)
 
             img = crop_img(img_ori, roi_box)
 
@@ -197,9 +173,6 @@ if __name__ == '__main__':
     parser.add_argument('--dump_paf', default='false', type=str2bool)
     parser.add_argument('--paf_size', default=3, type=int, help='PAF feature kernel size')
     parser.add_argument('--dump_obj', default='true', type=str2bool)
-    parser.add_argument('--dlib_bbox', default='true', type=str2bool, help='whether use dlib to predict bbox')
-    parser.add_argument('--dlib_landmark', default='true', type=str2bool,
-                        help='whether use dlib landmark to crop image')
 
     args = parser.parse_args()
     main(args)

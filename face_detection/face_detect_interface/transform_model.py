@@ -31,8 +31,8 @@ if __name__ == '__main__':
         print("pytorch version is not  1.0.0, please check it!")
         exit(-1)
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    checkpoint_file_path = r"./models/mobilenet_v2_0.25_40_0.1173.pth"
-    save_path = r"./models/mobilenet_v2_0.25_40_0.1173_jit.pth"
+    checkpoint_file_path = r"./models/mobilenet_v2_0.25_43_0.1162.pth"
+    save_path = r"./models/mobilenet_v2_0.25_43_0.1162_jit.pth"
     check_point = torch.load(checkpoint_file_path, map_location=device)
     # mapped_state_dict = OrderedDict()
     model = check_point['net'].to(device)

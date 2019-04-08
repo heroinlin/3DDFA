@@ -78,7 +78,7 @@ class FaceDetector(object):
             print("Pytorch version is not  1.0.0, please check it!")
             exit(-1)
         if self.checkpoint_file_path is None:
-            self.checkpoint_file_path = os.path.join(root_dir, "models/NU_squeezeNet1.2_96_0.0724_jit.pth")
+            self.checkpoint_file_path = os.path.join(root_dir, "models/mobilenet_v2_0.25_43_0.1162_jit.pth")
         if self.device is None:
             self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         # check_point = torch.load(self.checkpoint_file_path, map_location=self.device)

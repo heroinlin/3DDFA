@@ -13,7 +13,7 @@ def recursion_change_bn(module):
 
 def pth_to_jit(model, save_path, device="cuda:0"):
     model.eval()
-    input_x = torch.randn(1, 3, 144, 160).to(device)
+    input_x = torch.randn(1, 3, 160, 160).to(device)
     new_model = torch.jit.trace(model, input_x)
     torch.jit.save(new_model, save_path)
 
@@ -21,8 +21,8 @@ def pth_to_jit(model, save_path, device="cuda:0"):
 def jit_to_onnx(jit_model_path, onnx_model_path):
     model = torch.jit.load(jit_model_path, map_location=torch.device('cuda:0'))
     model.eval()
-    example_input = torch.randn(1, 3, 144, 160).to("cuda:0")
-    example_output = torch.rand(1, 735, 1).to("cuda:0"), torch.randn(1, 735, 4).to("cuda:0")
+    example_input = torch.randn(1, 3, 160, 160).to("cuda:0")
+    example_output = torch.rand(1, 805, 1).to("cuda:0"), torch.randn(1, 805, 4).to("cuda:0")
     torch.onnx._export(model, example_input, onnx_model_path, example_outputs=example_output, verbose=True)
 
 
@@ -31,8 +31,8 @@ if __name__ == '__main__':
         print("pytorch version is not  1.0.0, please check it!")
         exit(-1)
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    checkpoint_file_path = r"./models/NU_squeezeNet1.2_96_0.0724.pth"
-    save_path = r"./models/NU_squeezeNet1.2_96_0.0724_jit.pth"
+    checkpoint_file_path = r"./models/mobilenet_v2_0.25_40_0.1173.pth"
+    save_path = r"./models/mobilenet_v2_0.25_40_0.1173_jit.pth"
     check_point = torch.load(checkpoint_file_path, map_location=device)
     # mapped_state_dict = OrderedDict()
     model = check_point['net'].to(device)

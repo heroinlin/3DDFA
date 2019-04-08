@@ -66,7 +66,7 @@ class FaceDetector(object):
         self.model_loader()
         self.config = {
             "width": 160,
-            "height": 166,
+            "height": 160,
             "mean":  [0.486, 0.459, 0.408],
             "stddev": [0.229, 0.224, 0.225],
             "detect_threshold": detect_threshold,

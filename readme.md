@@ -1,7 +1,11 @@
 # Face Alignment in Full Pose Range: A 3D Total Solution
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![HitCount](http://hits.dwyl.io/cleardusk/3DDFA.svg)](http://hits.dwyl.io/cleardusk/3DDFA)
+![stars](https://img.shields.io/github/stars/cleardusk/3DDFA.svg?style=flat)
+![GitHub issues](https://img.shields.io/github/issues/cleardusk/3DDFA.svg)
+![GitHub repo size](https://img.shields.io/github/repo-size/cleardusk/3DDFA.svg)
 
-This project is authored by [Jianzhu Guo](https://guojianzhu.com/aboutme.html), [Xiangyu Zhu](http://www.cbsr.ia.ac.cn/users/xiangyuzhu/) and partially supervised by [Zhen Lei](http://www.cbsr.ia.ac.cn/users/zlei/).
+By [Jianzhu Guo](https://guojianzhu.com/aboutme.html).
 
 <p align="center">
   <img src="samples/obama_three_styles.gif" alt="obama">
@@ -9,6 +13,9 @@ This project is authored by [Jianzhu Guo](https://guojianzhu.com/aboutme.html), 
 
 **\[Updates\]**
 
+ - `2019.5.2`: Evaluating inference speed on CPU with PyTorch v1.1.0, see [here](#CPU) and [speed_cpu.py](./speed_cpu.py).
+ - `2019.4.27`: A simple render pipline running at ~25ms/frame (720p), see [rendering.py](demo@obama/rendering.py) for more details.
+ - `2019.4.24`: Providing the demo building of obama, see [demo@obama/readme.md](demo@obama/readme.md) for more details.
  - `2019.3.28`: Some updates.
  - `2018.12.23`: **Add several features: depth image estimation, PNCC, PAF feature and obj serialization.** See `dump_depth`, `dump_pncc`, `dump_paf`, `dump_obj` options for more details.
  - `2018.12.2`: Support landmark-free face cropping, see `dlib_landmark` option.
@@ -73,7 +80,7 @@ Several results on ALFW-2000 dataset (inferenced from model *phase1_wpdc_vdc.pth
 
 ## Getting started
 ### Requirements
- - PyTorch >= 0.4.1
+ - PyTorch >= 0.4.1 (**PyTorch v1.1.0** is tested successfully on macOS and Linux.)
  - Python >= 3.6 (Numpy, Scipy, Matplotlib)
  - Dlib (Dlib is optionally for face and landmarks detection. There is no need to use Dlib if you can provide face bouding bbox and landmarks. Besides, you can try the two-step inference strategy without initialized landmarks.)
  - OpenCV (Python version, for image IO opertations.)
@@ -172,6 +179,21 @@ In addition, I strongly recommend using Python3.6+ instead of older version for 
 
     
 ## Inference speed
+### CPU
+Just run
+```
+python3 speed_cpu.py
+```
+
+On my MBP (i5-8259U CPU @ 2.30GHz on 13-inch MacBook Pro), based on **PyTorch v1.1.0**, with a single input, the running output is:
+```
+Inference speed: 14.50±0.11 ms
+```
+
+<!-- [speed_cpu.py](./speed_cpu.py) -->
+
+
+### GPU
 When input batch size is 128, the total inference time of MobileNet-V1 takes about 34.7ms. The average speed is about **0.27ms/pic**.
 
 <p align="center">
@@ -255,7 +277,8 @@ The performances of pre-trained models are shown below. In the first stage, the 
 
 ## Acknowledgement
  - Thanks for [Yao Feng](https://github.com/YadiraF)'s fantastic works [PRNet](https://github.com/YadiraF/PRNet) and [face3d](https://github.com/YadiraF/face3d).
- - Thanks for the official PyTorch twitter account's [tweet](https://twitter.com/PyTorch/status/1066064914249367552).
+ - Thanks for this [tweet](https://twitter.com/PyTorch/status/1066064914249367552) of PyTorch.
+ - This project is partially supervised by [Xiangyu Zhu](http://www.cbsr.ia.ac.cn/users/xiangyuzhu/) and [Zhen Lei](http://www.cbsr.ia.ac.cn/users/zlei/).
 
 
 Thanks for your interest in this repo. If your work or research benefit from this repo, please cite it, star it and popularize it 😃

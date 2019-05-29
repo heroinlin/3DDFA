@@ -18,12 +18,8 @@ import cv2
 from face_detection.face_detect_interface import FaceDetector, box_transform
 from utils.ddfa import ToTensorGjz, NormalizeGjz, str2bool
 import scipy.io as sio
-from utils.inference import get_suffix, parse_roi_box_from_landmark, crop_img, predict_68pts, dump_to_ply, dump_vertex, \
-    predict_dense, parse_roi_box_from_bbox, get_colors, write_obj_with_colors
-from utils.cv_plot import plot_pose_box
+from utils.inference import parse_roi_box_from_landmark, crop_img, predict_68pts, parse_roi_box_from_bbox
 from utils.estimate_pose import parse_pose
-from utils.render import get_depths_image, cget_depths_image, cpncc
-from utils.paf import gen_img_paf
 import argparse
 import torch.backends.cudnn as cudnn
 

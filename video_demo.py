@@ -18,8 +18,10 @@ import cv2
 from face_detection.face_detect_interface import FaceDetector, box_transform
 from utils.ddfa import ToTensorGjz, NormalizeGjz, str2bool
 import scipy.io as sio
-from utils.inference import parse_roi_box_from_landmark, crop_img, predict_68pts, parse_roi_box_from_bbox
+from utils.inference import parse_roi_box_from_landmark, crop_img, predict_68pts, predict_dense, parse_roi_box_from_bbox
 from utils.estimate_pose import parse_pose
+from utils.cv_plot import plot_pose_box
+from utils.render import get_depths_image, cget_depths_image, cpncc
 import argparse
 import torch.backends.cudnn as cudnn
 
@@ -93,6 +95,7 @@ def main(args):
         rects = face_detector.detect(img_ori)
         rects = box_transform(rects, img_ori.shape[1], img_ori.shape[0])
         pts_res = []
+        vertices_lst = []
         Ps = []  # Camera matrix collection
         poses = []  # pose collection, [todo: validate it]
         for rect in rects:
@@ -133,6 +136,24 @@ def main(args):
             P, pose = parse_pose(param)
             Ps.append(P)
             poses.append(pose)
+            vertices = predict_dense(param, roi_box)
+            vertices_lst.append(vertices)
+        if args.show_pose:
+            # P, pose = parse_pose(param)  # Camera matrix (without scale), and pose (yaw, pitch, roll, to verify)
+            img_pose = plot_pose_box(img_ori, Ps, pts_res)
+            img_ori = img_pose
+        if args.show_depth:
+            # depths_img = get_depths_image(img_ori, vertices_lst, tri-1)  # python version
+            depths_img = cget_depths_image(img_ori, vertices_lst, tri - 1)  # cython version
+            # img_ori = depths_img
+            img_ori = (img_ori + 0.5 * np.tile(depths_img, (3, 1, 1)).transpose([1, 2, 0])) / 255.0
+        if args.show_pncc:
+            pncc_feature = cpncc(img_ori, vertices_lst, tri - 1)  # cython version
+            # pncc_feature = pncc_feature[:, :, ::-1]  # swap RGB -> BGR
+            # img_ori = np.asarray(img_ori + 0.5 * pncc_feature, dtype=np.uint8())
+            img_ori = (img_ori + 0.5 * pncc_feature)/255.0
+            # print(pncc_feature)
+            # exit(1)
         cv2.imshow("video", img_ori)
         key = cv2.waitKey(decay_time)
         if key == 32:
@@ -149,6 +170,9 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--video_path', default=0, type=str, help='video path， default use camera')
     parser.add_argument('--bbox_init', default='one', type=str,
                         help='one|two: one-step bbox initialization or two-step')
+    parser.add_argument('--show_pose', default='false', type=str2bool)
+    parser.add_argument('--show_depth', default='false', type=str2bool)
+    parser.add_argument('--show_pncc', default='false', type=str2bool)
 
     args = parser.parse_args()
     print(args)

@@ -80,10 +80,10 @@ def main(args):
     # 3. forward
     tri = sio.loadmat('visualize/tri.mat')['tri']
     transform = transforms.Compose([ToTensorGjz(), NormalizeGjz(mean=127.5, std=128)])
-    video = cv2.VideoCapture(0)
+    video = cv2.VideoCapture()
     auto_play_flag = False
     decay_time = 1 if auto_play_flag else 0
-    if not video.open(0):
+    if not video.open(args.video_path):
         print("can not open camera!")
         return
     while True:
@@ -145,24 +145,11 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='3DDFA inference pipeline')
-    parser.add_argument('-f', '--files', nargs='+',
-                        help='image files paths fed into network, single or multiple images')
     parser.add_argument('-m', '--mode', default='cpu', type=str, help='gpu or cpu mode')
-    parser.add_argument('--show_flg', default='true', type=str2bool, help='whether show the visualization result')
+    parser.add_argument('-v', '--video_path', default=0, type=str, help='video path， default use camera')
     parser.add_argument('--bbox_init', default='one', type=str,
                         help='one|two: one-step bbox initialization or two-step')
-    parser.add_argument('--dump_res', default='false', type=str2bool, help='whether write out the visualization image')
-    parser.add_argument('--dump_vertex', default='false', type=str2bool,
-                        help='whether write out the dense face vertices to mat')
-    parser.add_argument('--dump_ply', default='false', type=str2bool)
-    parser.add_argument('--dump_pts', default='false', type=str2bool)
-    parser.add_argument('--dump_roi_box', default='false', type=str2bool)
-    parser.add_argument('--dump_pose', default='false', type=str2bool)
-    parser.add_argument('--dump_depth', default='false', type=str2bool)
-    parser.add_argument('--dump_pncc', default='false', type=str2bool)
-    parser.add_argument('--dump_paf', default='false', type=str2bool)
-    parser.add_argument('--paf_size', default=3, type=int, help='PAF feature kernel size')
-    parser.add_argument('--dump_obj', default='false', type=str2bool)
 
     args = parser.parse_args()
+    print(args)
     main(args)
